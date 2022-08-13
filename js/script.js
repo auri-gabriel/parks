@@ -1,7 +1,7 @@
 'use strict';
 
 const apiUrl = 'https://developer.nps.gov/api/v1/parks'
-const apiKey = 'ZcHO2ebUqyQoC9hSnBbMgqdRtDnPDMrghu7zUbOT';
+const apiKey = '';
 const stateCodes = [
   "AL",
   "AK",
