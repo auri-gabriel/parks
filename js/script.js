@@ -98,14 +98,14 @@ const createCard = (park) => {
     <div class="col">
       <div class="card mb-3" style="max-width: 540px">
         <div class="row g-0">
-          <div class="col-md-4">
-            <img src="${park.images[0].url}" class="img-fluid rounded-start" alt="${park.images[0].altText}" />
+          <div class="col-md-4 ratio ratio-1x1" style="overflow: hidden;">
+            <img src="${park.images[0].url}" class="img-fluid rounded-top" style=" height: 100%; object-fit: cover;" alt="${park.images[0].altText}" />
           </div>
-          <div class="col-md-8">
+          <div class="col-md-12">
             <div class="card-body">
               <h5 class="card-title">${park.fullName}</h5>
               <p class="card-text">
-                ${park.description}
+                ${park.description.substring(0, 150) + '...'}
               </p>
             </div>
           </div>
