@@ -1,79 +1,8 @@
 'use strict';
 
 const apiUrl = 'https://developer.nps.gov/api/v1/parks'
-const apiKey = '';
-const stateCodes = [
-  "AL",
-  "AK",
-  "AS",
-  "AZ",
-  "AR",
-  "CA",
-  "CO",
-  "CT",
-  "DE",
-  "DC",
-  "FM",
-  "FL",
-  "GA",
-  "GU",
-  "HI",
-  "ID",
-  "IL",
-  "IN",
-  "IA",
-  "KS",
-  "KY",
-  "LA",
-  "ME",
-  "MH",
-  "MD",
-  "MA",
-  "MI",
-  "MN",
-  "MS",
-  "MO",
-  "MT",
-  "NE",
-  "NV",
-  "NH",
-  "NJ",
-  "NM",
-  "NY",
-  "NC",
-  "ND",
-  "MP",
-  "OH",
-  "OK",
-  "OR",
-  "PW",
-  "PA",
-  "PR",
-  "RI",
-  "SC",
-  "SD",
-  "TN",
-  "TX",
-  "UT",
-  "VT",
-  "VI",
-  "VA",
-  "WA",
-  "WV",
-  "WI",
-  "WY"
-];
-
-const stateSelector = document.querySelector('#state-selector');
-
-stateCodes.forEach((stateCode) => {
-  let option = document.createElement('option');
-  option.value = stateCode;
-  option.innerText = stateCode;
-  stateSelector.appendChild(option);
-});
-
-let currentSelected = stateSelector.options[stateSelector.selectedIndex].text;
+const apiKey = 'ZcHO2ebUqyQoC9hSnBbMgqdRtDnPDMrghu7zUbOT';
+const stateJsonUrl = '../assets/states.json';
 
 
 const handleErrors = (response) => {
@@ -82,15 +11,55 @@ const handleErrors = (response) => {
   }
   return response.json();
 }
-
-const createRequest = (url, succeed, fail, init) => {
-  fetch(url, init)
+/**
+ * 
+ * @param {string} url - The URL to fetch from
+ * @param {function} succeed - function to execute on success
+ * @param {function} fail - function to execute on fail
+ */
+const createRequest = (url, succeed, fail) => {
+  fetch(url)
     .then((response) => handleErrors(response))
     .then((data) => succeed(data))
     .then((error) => fail(error));
 };
+const stateSelector = document.querySelector('#state-selector');
 
+/**
+ * 
+ * @param {object} data 
+ */
+const fillStatesSelector = (data) => {
+  data.forEach((state) => {
+    let option = document.createElement('option');
+    option.value = state.abbreviation;
+    option.innerText = state.name;
+    stateSelector.appendChild(option);
+  }
+  );
+
+  //after filling the selector with values
+  //we call requestParksAndMakeCards with the current selected value.
+  requestParksAndMakeCards(stateSelector.value);
+}
+
+/** 
+* Fetch the states.json and pass it to fillStatesSelector
+*/
+createRequest(
+  stateJsonUrl,
+  fillStatesSelector,
+  (error) => { console.log(error) }
+);
+
+
+/**
+ * 
+ * @param {object} park - Object with park information
+ * @returns {string} column - a column element with the park card
+ */
 const createCard = (park) => {
+
   let column = document.createElement('div');
   column.classList.add('col');
 
@@ -118,6 +87,10 @@ const createCard = (park) => {
 
 const parksContainer = document.querySelector('#parks');
 
+/**
+ * Access the data array in the object and call the create card for each item
+ * @param {object} object - Response from the request
+ */
 function makeCards(object) {
   resetCards();
   let parks = object.data;
@@ -126,27 +99,32 @@ function makeCards(object) {
     parksContainer.appendChild(parkCard);
   })
 }
-
+/**
+ * Remove all cards from the page.
+ */
 function resetCards() {
   while (parksContainer.firstChild) {
     parksContainer.removeChild(parksContainer.firstChild);
   }
 }
 
-//make request on start
-createRequest(
-  apiUrl + '?stateCode=' + currentSelected + '&api_key=' + apiKey,
-  makeCards,
-  (error) => { console.log(error) }
-);
+let currentSelected = stateSelector.value;
 
-//make request when selected state changes
-stateSelector.addEventListener('change', (e) => {
-  currentSelected = stateSelector.options[stateSelector.selectedIndex].text;
-  console.log(currentSelected);
+/**
+ * Requests the parks from a state and make the cards
+ * @param {string} currentSelected - the state abbreviation we want to request the parks
+ */
+const requestParksAndMakeCards = (currentSelected) => {
   createRequest(
     apiUrl + '?stateCode=' + currentSelected + '&api_key=' + apiKey,
     makeCards,
     (error) => { console.log(error) }
-  );
+  )
+};
+
+//make request when selected state changes
+stateSelector.addEventListener('change', (e) => {
+  currentSelected = stateSelector.value;
+  console.log(currentSelected);
+  requestParksAndMakeCards(currentSelected);
 })
